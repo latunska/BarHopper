@@ -1,6 +1,6 @@
 package acm_aka_the_best.barhopper;
 
-import com.uber.sdk.android.core.UberSdk;
+// import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.rides.client.SessionConfiguration;
 
@@ -8,7 +8,7 @@ import com.uber.sdk.rides.client.SessionConfiguration;
  * Created by Evan on 10/28/2017.
  */
 
-private class UberSdk implements barhopper {
+public class UberSdk implements barhopper {
     public UberSdk(SessionConfiguration config) {
         this.config = config;
     }
@@ -26,5 +26,5 @@ private class UberSdk implements barhopper {
             //.setEnvironment(SessionConfiguration.Environment.SANDBOX)
             .build();
 // initialize the SDK with the config object:
-    UberSdk.initialize(config);
+
 }
