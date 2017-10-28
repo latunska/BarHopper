@@ -1,9 +1,14 @@
 package acm_aka_the_best.barhopper;
 
+import android.*;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -12,6 +17,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,17 +26,26 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionApi;
+import com.google.android.gms.location.places.PlaceFilter;
 import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -44,16 +59,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private GoogleApiClient mGoogleApiClient;
+    private PlaceDetectionApi mPlaceDetectionClient;
+    public static int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION =1;
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private int test;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        test = 0;
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -75,8 +95,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .enableAutoManage(this, this)
                 .build();
 
-        
 
+
+        guessCurrentPlace();
     }
 
 
@@ -100,6 +121,62 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onStop();
+    }
+
+    private void guessCurrentPlace() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(this,
+                    new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
+            Toast toast = Toast.makeText(getApplicationContext(), "Ain't got no permission bitch!", Toast.LENGTH_LONG);
+            toast.show();
+            return;
+        }
+        List<String> filters = new ArrayList<>();
+        filters.add(String.valueOf(Place.TYPE_UNIVERSITY));
+        PlaceFilter placeFilter = new PlaceFilter(false, filters);
+
+        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, placeFilter);
+        result.setResultCallback( new ResultCallback<PlaceLikelihoodBuffer>() {
+            @Override
+            public void onResult( PlaceLikelihoodBuffer likelyPlaces ) {
+                PlaceLikelihood placeLikelihood=null;
+                if(likelyPlaces.getCount()>0)
+                    placeLikelihood = likelyPlaces.get( 0 );
+                String content = "Nope";
+                if( placeLikelihood != null && placeLikelihood.getPlace() != null && !TextUtils.isEmpty( placeLikelihood.getPlace().getName() ) )
+                    content = "Most likely place: " + placeLikelihood.getPlace().getName() + "\n";
+                if( placeLikelihood != null )
+                    content += "Percent change of being there: " + (int) ( placeLikelihood.getLikelihood() * 100 ) + "%";
+                Toast toast = Toast.makeText(getApplicationContext(), content, Toast.LENGTH_LONG);
+                toast.show();
+
+                likelyPlaces.release();
+            }
+        });
     }
 
     @Override
