@@ -4,7 +4,7 @@ android {
     compileSdkVersion 24
     buildToolsVersion '25.0.0'
     defaultConfig {
-        applicationId "acm_aka_the_best.barhopper"
+        applicationId "acm_aka_the_best.barhopper.png"
         minSdkVersion 14
         targetSdkVersion 24
         versionCode 1

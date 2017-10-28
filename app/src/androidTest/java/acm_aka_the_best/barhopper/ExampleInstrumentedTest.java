@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("acm_aka_the_best.barhopper", appContext.getPackageName());
+        assertEquals("acm_aka_the_best.barhopper.png", appContext.getPackageName());
     }
 }
