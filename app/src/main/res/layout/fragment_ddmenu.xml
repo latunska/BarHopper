@@ -3,18 +3,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="acm_aka_the_best.barhopper.DDMenu">
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/uber_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/uber_button_text" />
+        <Button
+            android:id="@+id/uber_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/uber_button_text" />
+        <Button
+            android:id="@+id/dd_Status_Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I'M DRIVING TONIGHT" />
+
+        <LinearLayout
+            android:id="@+id/available_Drivers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Available Drivers"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
 
 </FrameLayout>

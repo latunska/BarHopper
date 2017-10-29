@@ -5,14 +5,18 @@
     tools:context="acm_aka_the_best.barhopper.BarMenu">
 
     <!-- TODO: Update blank fragment layout -->
-
-    <LinearLayout
-        android:id="@+id/barLayout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/barLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
+
+        </LinearLayout>
+    </ScrollView>
 </FrameLayout>
