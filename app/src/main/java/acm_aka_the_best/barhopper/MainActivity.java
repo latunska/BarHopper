@@ -4,7 +4,10 @@ import android.*;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -35,6 +38,9 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionApi;
@@ -47,7 +53,9 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+import static com.google.android.gms.location.LocationServices.FusedLocationApi;
+
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -67,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
      */
     private ViewPager mViewPager;
     private int test;
+
+    private LocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,8 +104,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .addApi(Places.PLACE_DETECTION_API)
                 .enableAutoManage(this, this)
                 .build();
-
-
 
         guessCurrentPlace();
     }
@@ -155,11 +163,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             toast.show();
             return;
         }
-        List<String> filters = new ArrayList<>();
-        filters.add(String.valueOf(Place.TYPE_UNIVERSITY));
-        PlaceFilter placeFilter = new PlaceFilter(false, filters);
 
-        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, placeFilter);
+
+        /*List<String> filters = new ArrayList<>();
+        filters.add(String.valueOf(Place.TYPE_UNIVERSITY));
+        PlaceFilter placeFilter = new PlaceFilter(false, filters);*/
+
+        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
         result.setResultCallback( new ResultCallback<PlaceLikelihoodBuffer>() {
             @Override
             public void onResult( PlaceLikelihoodBuffer likelyPlaces ) {
@@ -181,6 +191,49 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Toast toast = Toast.makeText(getApplicationContext(), "hello emeny", Toast.LENGTH_LONG);
+        toast.show();
+    }
+
+    @Override
+    public void onLocationChanged(final Location location) {
+        new Thread(new Runnable() {
+            public void run() {
+                // do something
+                ArrayList<acm_aka_the_best.barhopper.Place> bar = new ArrayList<acm_aka_the_best.barhopper.Place>();
+                bar = PlacesService.search("", location.getLatitude(), location.getLongitude(), 500000);
+                if(!bar.isEmpty())
+                    Toast.makeText(getApplicationContext(), bar.get(0).name, Toast.LENGTH_LONG).show();
+            }
+        }).start();
+
+
+    }
+
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Toast toast = Toast.makeText(getApplicationContext(), "hello frendly", Toast.LENGTH_LONG);
+        toast.show();
+        LocationRequest mLocationRequest = new LocationRequest();
+
+        // Sets the desired interval for active location updates. This interval is
+        // inexact. You may not receive updates at all if no location sources are available, or
+        // you may receive them slower than requested. You may also receive updates faster than
+        // requested if other applications are requesting location at a faster interval.
+        mLocationRequest.setInterval(10000);
+
+        // Sets the fastest rate for active location updates. This interval is exact, and your
+        // application will never receive updates faster than this value.
+        mLocationRequest.setFastestInterval(10000);
+
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, MainActivity.this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
 
     }
 
